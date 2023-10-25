@@ -1,7 +1,3 @@
-using DataAccess.Repository;
-using MyStoreWinApp.Presenter;
-using MyStoreWinApp.View;
-
 namespace MyStoreWinApp
 {
     internal static class Program
@@ -15,10 +11,7 @@ namespace MyStoreWinApp
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            IfrmLogin loginForm = new frmLogin();
-            IMemberRepository repository = new MemberRepository();
-            new LoginPresenter(loginForm, repository);
-            Application.Run(loginForm as Form);
+            Application.Run(new frmLogin());
         }
     }
 }

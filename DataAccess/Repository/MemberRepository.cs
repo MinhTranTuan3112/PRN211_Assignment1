@@ -9,34 +9,54 @@ namespace DataAccess.Repository
 {
     public class MemberRepository : IMemberRepository
     {
-        public void AddNewMember(MemberObject member)
+        public void addNewMember(MemberObject newMember)
         {
-            MemberDAO.Instance.AddNewMember(member);
+            MemberDAO.Instance.addNewMember(newMember);
         }
 
-        public void DeleteMember(string MemberID)
+        public void deleteMember(string MemberID)
         {
-            MemberDAO.Instance.DeleteMember(MemberID);
-        }
-
-        public List<MemberObject> getAllMembers()
-        {
-            return MemberDAO.Instance.getAllMembers();
+            MemberDAO.Instance.Delete(MemberID);
         }
 
         public MemberObject getMemberByID(string MemberID)
         {
-            return MemberDAO.Instance.GetMemberByID(MemberID);
+            return MemberDAO.Instance.getMemberByID(MemberID);
         }
 
-        public MemberObject Login(string Email, string Password)
+        public IEnumerable<MemberObject> getMemberList()
         {
-            return MemberDAO.Instance.Login(Email, Password);
+            return MemberDAO.Instance.getMemberList();
         }
 
-        public void UpdateMember(MemberObject member)
+        public MemberObject Login(string email, string password)
         {
-            MemberDAO.Instance.UpdateMember(member);
+            return MemberDAO.Instance.Login(email, password);
+        }
+
+        public IEnumerable<MemberObject> search(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return getMemberList();
+            }
+            return getMemberList().Where(member
+                => member.MemberName.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0 || member.MemberID.Equals(keyword)).ToList();
+        }
+
+        public IEnumerable<MemberObject> SearchAll(bool hasSort, string keyword, string City, string Country)
+        {
+            return MemberDAO.Instance.SearchAll(hasSort, keyword, City, Country);
+        }
+
+        public IEnumerable<MemberObject> SortDescendingMemberName()
+        {
+            return MemberDAO.Instance.SortByMemberNameDescending();
+        }
+
+        public void updateMember(MemberObject member)
+        {
+            MemberDAO.Instance.Update(member);
         }
     }
 }

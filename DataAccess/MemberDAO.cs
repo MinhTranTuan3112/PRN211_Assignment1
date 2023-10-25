@@ -5,22 +5,68 @@ using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace DataAccess
 {
     public class MemberDAO
     {
         //Fields
+        private static List<MemberObject> member_list = new List<MemberObject>()
+        {
+            new MemberObject
+    {
+        MemberID = "1",
+        MemberName = "John Doe",
+        Email = "john@example.com",
+        Password = "password1",
+        City = "New York",
+        Country = "USA",
+        Role = "User"
+    },
+    new MemberObject
+    {
+        MemberID = "2",
+        MemberName = "Alice Smith",
+        Email = "alice@example.com",
+        Password = "password2",
+        City = "Los Angeles",
+        Country = "USA",
+         Role = "User"
+    },
+    new MemberObject
+    {
+        MemberID = "3",
+        MemberName = "Bob Johnson",
+        Email = "bob@example.com",
+        Password = "password3",
+        City = "London",
+        Country = "UK",
+        Role = "User"
+    },
+    new MemberObject
+    {
+        MemberID = "4",
+        MemberName = "Eva Rodriguez",
+        Email = "eva@example.com",
+        Password = "password4",
+        City = "Miami",
+        Country = "USA",
+        Role = "User"
+    },
+    new MemberObject
+    {
+        MemberID = "5",
+        MemberName = "Maria Garcia",
+        Email = "maria@example.com",
+        Password = "password5",
+        City = "Madrid",
+        Country = "Spain",
+        Role = "User"
+    }
+        };
         private static MemberDAO instance = null;
         private static readonly object instanceLock = new object();
-        private static List<MemberObject> MemberList = new List<MemberObject>()
-        {
-            new MemberObject()
-            {
-                Email = "john@gmail.com",
-                Password = "123"
-            }
-        };
 
         //Constructor
         private MemberDAO()
@@ -43,52 +89,90 @@ namespace DataAccess
                 }
             }
         }
-
-        public List<MemberObject> getAllMembers()
+        public List<MemberObject> getMemberList() => member_list;
+        public MemberObject getMemberByID(string MemberID)
         {
-            return MemberList;
-        }
-
-        public MemberObject GetMemberByID(string MemberID)
-        {
-            var member = MemberList.FirstOrDefault(m => m.MemberID.Equals(MemberID));
+            var member = member_list.FirstOrDefault(member =>
+            member.MemberID is not null && member.MemberID.Equals(MemberID));
             return member;
         }
-
-        public void AddNewMember(MemberObject member)
+        public void addNewMember(MemberObject newMember)
         {
-            var memberInList = GetMemberByID(member.MemberID);
-            if (memberInList is not null)
+            if (getMemberByID(newMember.MemberID) is not null)
             {
                 return;
             }
-            MemberList.Add(member);
+            member_list.Add(newMember);
         }
-
-        public void UpdateMember(MemberObject newMember)
+        public void Update(MemberObject newMember)
         {
-            int memberIndex = MemberList.IndexOf(newMember);
-            if (memberIndex == -1)
+            var memberInList = getMemberByID(newMember.MemberID);
+            if (memberInList is null)
             {
                 return;
             }
-            MemberList[memberIndex] = newMember;
+            var updateIndex = member_list.IndexOf(memberInList);
+            member_list[updateIndex] = newMember;
         }
-
-        public void DeleteMember(string MemberID)
+        public void Delete(string MemberID)
         {
-            var memberInList = GetMemberByID(MemberID);
-            if (memberInList is not null)
+            if (member_list is null || member_list.Count == 0)
             {
                 return;
             }
-            MemberList.Remove(memberInList);
+            var memberInList = getMemberByID(MemberID);
+            member_list?.Remove(memberInList);
+        }
+        public List<MemberObject> Search(string keyword)
+        {
+            return member_list.Where(member => member.MemberName.Contains(keyword) || member.MemberID.Equals(keyword)).ToList();
+        }
+        public MemberObject Login(string email, string password)
+        {
+            var memberLogin = member_list.FirstOrDefault(member => member.Email.Equals(email) && password.Equals(password));
+            return memberLogin;
         }
 
-        public MemberObject Login(string Email, string Password)
+        public List<MemberObject> FilterByCityAndCountry(string city, string country)
         {
-            var member = MemberList.FirstOrDefault(m => m.Email.Equals(Email) && m.Password.Equals(Password));
-            return member;
+            var query = member_list.AsQueryable();
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(member => member.City.Equals(city));
+            }
+            if (!string.IsNullOrEmpty(country))
+            {
+                query = query.Where(member => member.Country.Equals(country));
+            }
+            return query.ToList();
+        }
+
+        public List<MemberObject> SearchAll(bool hasSort, string keyword, string City, string Country)
+        {
+            var query = member_list.AsQueryable();
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(member => member.MemberName.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0
+                || member.MemberID.Equals(keyword));
+            }
+            if (!string.IsNullOrEmpty(City))
+            {
+                query = query.Where(member => member.City.Equals(City));
+            }
+            if (!string.IsNullOrEmpty(Country))
+            {
+                query = query.Where(member => member.Country.Equals(Country));
+            }
+            if (hasSort)
+            {
+                query = query.OrderByDescending(member => member.MemberName);
+            }
+            return query.ToList();
+        }
+        public List<MemberObject> SortByMemberNameDescending()
+        {
+            var newMemberList = member_list.OrderByDescending(member => member.MemberName).ToList();
+            return newMemberList;
         }
     }
 }
